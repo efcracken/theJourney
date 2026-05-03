@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0c0b09;
+    --bg2: #141310;
+    --cream: #e8e2d8;
+    --muted: #6b6560;
+    --accent: #c8a96e;
+    --border: rgba(200,169,110,0.15);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    min-height: 100vh;
+    cursor: default;
+  }
+
+  /* grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.4;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 4rem 4rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    animation: fadeUp 1s ease forwards;
+  }
+
+  .site-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.4rem, 6vw, 4.5rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--cream);
+  }
+
+  .site-name em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .site-tagline {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  nav {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  nav a {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  nav a:hover, nav a.active { color: var(--cream); }
+
+  nav .dot {
+    width: 3px; height: 3px;
+    background: var(--border);
+    border-radius: 50%;
+  }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    padding: 1.5rem 4rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    animation: fadeUp 1s ease 0.2s both;
+  }
+
+  .filter-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.4rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 2px;
+  }
+
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+
+  /* ── MASONRY GRID ── */
+  .gallery {
+    padding: 3rem 4rem;
+    columns: 3 280px;
+    column-gap: 1rem;
+    animation: fadeUp 1s ease 0.3s both;
+  }
+
+  .gallery-item {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    border-radius: 2px;
+    display: block;
+  }
+
+  .gallery-item img,
+  .gallery-item .video-thumb {
+    width: 100%;
+    display: block;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    filter: brightness(0.88);
+  }
+
+  .gallery-item:hover img,
+  .gallery-item:hover .video-thumb { transform: scale(1.03); filter: brightness(1); }
+
+  .item-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(12,11,9,0.85) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1rem;
+  }
+
+  .gallery-item:hover .item-overlay { opacity: 1; }
+
+  .item-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 300;
+    color: var(--cream);
+    line-height: 1.2;
+  }
+
+  .item-meta {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+  }
+
+  .video-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: rgba(12,11,9,0.8);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    padding: 0.3rem 0.6rem;
+    text-transform: uppercase;
+    border-radius: 2px;
+  }
+
+  .video-thumb {
+    background: var(--bg2);
+    aspect-ratio: 16/9;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .video-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    inset: 0;
+  }
+
+  .play-icon {
+    position: relative;
+    z-index: 1;
+    width: 44px;
+    height: 44px;
+    border: 1.5px solid rgba(232,226,216,0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .play-icon::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 8px 0 8px 14px;
+    border-color: transparent transparent transparent var(--cream);
+    margin-left: 3px;
+  }
+
+  .hidden { display: none !important; }
+
+  /* ── LIGHTBOX ── */
+  #lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(12,11,9,0.97);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+  }
+
+  #lightbox.open { display: flex; }
+
+  .lb-inner {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #lb-img {
+    max-width: 85vw;
+    max-height: 82vh;
+    object-fit: contain;
+    display: block;
+    border-radius: 2px;
+  }
+
+  #lb-iframe {
+    width: min(85vw, 960px);
+    aspect-ratio: 16/9;
+    border: none;
+    border-radius: 2px;
+  }
+
+  .lb-caption {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+
+  .lb-caption-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-weight: 300;
+    color: var(--cream);
+  }
+
+  .lb-caption-meta {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+  }
+
+  .lb-close {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    border-radius: 2px;
+  }
+
+  .lb-close:hover { border-color: var(--cream); color: var(--cream); }
+
+  .lb-nav {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 1.2rem;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+  }
+
+  .lb-nav:hover { border-color: var(--cream); color: var(--cream); }
+  #lb-prev { left: 1.5rem; }
+  #lb-next { right: 1.5rem; }
+
+  .lb-counter {
+    position: fixed;
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 3rem 4rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  footer p {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    header, .filter-bar, .gallery, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .gallery { columns: 2 160px; }
+    nav { gap: 1rem; }
+  }
+
+  @media (max-width: 480px) {
+    .gallery { columns: 1; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 class="site-name">Dein <em>Name</em></h1>
+  <p class="site-tagline">Fotografie &amp; Visuals</p>
+  <nav>
+    <a href="#" class="active" data-filter="all">Alle</a>
+    <span class="dot"></span>
+    <a href="#" data-filter="reisen">Reisen</a>
+    <span class="dot"></span>
+    <a href="#" data-filter="portrait">Portrait</a>
+    <span class="dot"></span>
+    <a href="#" data-filter="natur">Natur</a>
+    <span class="dot"></span>
+    <a href="#" data-filter="video">Video</a>
+  </nav>
+</header>
+
+<div class="gallery" id="gallery"></div>
+
+<!-- Lightbox -->
+<div id="lightbox">
+  <button class="lb-close" id="lb-close">schliessen</button>
+  <span class="lb-counter" id="lb-counter"></span>
+  <button class="lb-nav" id="lb-prev">&#8592;</button>
+  <div class="lb-inner" id="lb-inner">
+    <img id="lb-img" src="" alt="" style="display:none">
+    <iframe id="lb-iframe" src="" allowfullscreen style="display:none"></iframe>
+  </div>
+  <button class="lb-nav" id="lb-next">&#8594;</button>
+  <div class="lb-caption">
+    <p class="lb-caption-title" id="lb-title"></p>
+    <p class="lb-caption-meta" id="lb-meta"></p>
+  </div>
+</div>
+
+<footer>
+  <p>&copy; 2025 Dein Name — Alle Rechte vorbehalten</p>
+  <p>Zürich, Schweiz</p>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   PORTFOLIO KONFIGURATION
+   Hier kannst du deine Fotos und Videos eintragen.
+
+   type:     "image" oder "youtube"
+   src:      Pfad zur Bilddatei (z.B. "bilder/foto1.jpg")
+             oder YouTube-Video-ID (z.B. "dQw4w9WgXcQ")
+   thumb:    Vorschaubild für YouTube (optional, sonst auto)
+   title:    Bildtitel
+   category: Kategorie für den Filter (muss mit nav übereinstimmen)
+   date:     Datum oder Ort – beliebiger Text
+═══════════════════════════════════════════════════ */
+const PORTFOLIO = [
+  {
+    type: "image",
+    src: "bilder/foto1.jpg",
+    title: "Goldene Stunde",
+    category: "natur",
+    date: "Appenzell, 2024"
+  },
+  {
+    type: "image",
+    src: "bilder/foto2.jpg",
+    title: "Altstadt",
+    category: "reisen",
+    date: "Lissabon, 2024"
+  },
+  {
+    type: "youtube",
+    src: "dQw4w9WgXcQ",
+    title: "Reel — Sommer 2024",
+    category: "video",
+    date: "2024"
+  },
+  {
+    type: "image",
+    src: "bilder/foto3.jpg",
+    title: "Stille",
+    category: "portrait",
+    date: "Studio, 2023"
+  },
+  {
+    type: "image",
+    src: "bilder/foto4.jpg",
+    title: "Bergpanorama",
+    category: "natur",
+    date: "Engadin, 2024"
+  },
+  {
+    type: "image",
+    src: "bilder/foto5.jpg",
+    title: "Markt",
+    category: "reisen",
+    date: "Marrakesch, 2023"
+  },
+  {
+    type: "youtube",
+    src: "dQw4w9WgXcQ",
+    title: "Reisefilm — Südeuropa",
+    category: "video",
+    date: "2023"
+  },
+  {
+    type: "image",
+    src: "bilder/foto6.jpg",
+    title: "Licht & Schatten",
+    category: "portrait",
+    date: "Winterthur, 2024"
+  },
+  {
+    type: "image",
+    src: "bilder/foto7.jpg",
+    title: "Nebel",
+    category: "natur",
+    date: "Pilatus, 2024"
+  }
+];
+
+/* ═══ GALLERY RENDER ═══ */
+const gallery = document.getElementById('gallery');
+let currentItems = [];
+let currentIndex = 0;
+let activeFilter = 'all';
+
+function getYtThumb(id) {
+  return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+}
+
+function renderGallery(filter) {
+  activeFilter = filter;
+  gallery.innerHTML = '';
+  currentItems = [];
+
+  PORTFOLIO.forEach((item, i) => {
+    if (filter !== 'all' && item.category !== filter) return;
+
+    currentItems.push({ ...item, originalIndex: i });
+    const el = document.createElement('div');
+    el.className = 'gallery-item';
+    el.dataset.index = currentItems.length - 1;
+
+    if (item.type === 'image') {
+      el.innerHTML = `
+        <img src="${item.src}" alt="${item.title}" loading="lazy">
+        <div class="item-overlay">
+          <p class="item-title">${item.title}</p>
+          <p class="item-meta">${item.date}</p>
+        </div>`;
+    } else {
+      const thumb = item.thumb || getYtThumb(item.src);
+      el.innerHTML = `
+        <div class="video-thumb">
+          <img src="${thumb}" alt="${item.title}" loading="lazy">
+          <div class="play-icon"></div>
+        </div>
+        <span class="video-badge">Video</span>
+        <div class="item-overlay">
+          <p class="item-title">${item.title}</p>
+          <p class="item-meta">${item.date}</p>
+        </div>`;
+    }
+
+    el.addEventListener('click', () => openLightbox(parseInt(el.dataset.index)));
+    gallery.appendChild(el);
+  });
+}
+
+/* ═══ LIGHTBOX ═══ */
+const lightbox = document.getElementById('lightbox');
+const lbImg    = document.getElementById('lb-img');
+const lbIframe = document.getElementById('lb-iframe');
+const lbTitle  = document.getElementById('lb-title');
+const lbMeta   = document.getElementById('lb-meta');
+const lbCounter = document.getElementById('lb-counter');
+
+function openLightbox(idx) {
+  currentIndex = idx;
+  showItem();
+  lightbox.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function showItem() {
+  const item = currentItems[currentIndex];
+  lbTitle.textContent = item.title;
+  lbMeta.textContent  = item.category.toUpperCase() + ' — ' + item.date;
+  lbCounter.textContent = (currentIndex + 1) + ' / ' + currentItems.length;
+
+  if (item.type === 'image') {
+    lbImg.src = item.src;
+    lbImg.alt = item.title;
+    lbImg.style.display = 'block';
+    lbIframe.style.display = 'none';
+    lbIframe.src = '';
+  } else {
+    lbImg.style.display = 'none';
+    lbIframe.style.display = 'block';
+    lbIframe.src = `https://www.youtube.com/embed/${item.src}?autoplay=1`;
+  }
+}
+
+function closeLightbox() {
+  lightbox.classList.remove('open');
+  lbIframe.src = '';
+  document.body.style.overflow = '';
+}
+
+document.getElementById('lb-close').addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+
+document.getElementById('lb-prev').addEventListener('click', () => {
+  currentIndex = (currentIndex - 1 + currentItems.length) % currentItems.length;
+  showItem();
+});
+
+document.getElementById('lb-next').addEventListener('click', () => {
+  currentIndex = (currentIndex + 1) % currentItems.length;
+  showItem();
+});
+
+document.addEventListener('keydown', e => {
+  if (!lightbox.classList.contains('open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft')  { currentIndex = (currentIndex - 1 + currentItems.length) % currentItems.length; showItem(); }
+  if (e.key === 'ArrowRight') { currentIndex = (currentIndex + 1) % currentItems.length; showItem(); }
+});
+
+/* ═══ NAV FILTER ═══ */
+document.querySelectorAll('nav a[data-filter]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelectorAll('nav a').forEach(x => x.classList.remove('active'));
+    a.classList.add('active');
+    renderGallery(a.dataset.filter);
+  });
+});
+
+/* ═══ INIT ═══ */
+renderGallery('all');
+</script>
+</body>
+</html>
