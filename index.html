@@ -8,679 +8,688 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --bg:      #0c0b09;
-    --bg2:     #141310;
-    --bg3:     #1a1916;
-    --cream:   #e8e2d8;
-    --muted:   #6b6560;
-    --accent:  #c8a96e;
-    --border:  rgba(200,169,110,0.15);
-  }
+/* ─────────────────────────────────────────
+   TOKENS
+───────────────────────────────────────── */
+:root {
+  --bg:      #0c0b09;
+  --bg2:     #141310;
+  --bg3:     #1c1a17;
+  --cream:   #e8e2d8;
+  --muted:   #6b6560;
+  --accent:  #c8a96e;
+  --border:  rgba(200,169,110,0.13);
+  --gap:     1rem;
+}
 
-  html { scroll-behavior: smooth; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
-  body {
-    background: var(--bg);
-    color: var(--cream);
-    font-family: 'DM Mono', monospace;
-    font-weight: 300;
-    min-height: 100vh;
-  }
+body {
+  background: var(--bg);
+  color: var(--cream);
+  font-family: 'DM Mono', monospace;
+  font-weight: 300;
+}
 
-  /* grain overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    background-size: 200px 200px;
-    pointer-events: none;
-    z-index: 999;
-    opacity: 0.4;
-  }
+/* grain */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.35;
+}
 
-  /* ── HEADER ── */
-  header {
-    padding: 4rem 4rem 2.5rem;
+/* ─────────────────────────────────────────
+   HERO
+───────────────────────────────────────── */
+.hero {
+  position: relative;
+  height: 100vh;
+  min-height: 560px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute; inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.55);
+  transition: transform 0.1s linear;
+  will-change: transform;
+}
+
+/* dark gradient at bottom */
+.hero::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(12,11,9,0.15) 0%,
+    rgba(12,11,9,0)    40%,
+    rgba(12,11,9,0.6)  75%,
+    rgba(12,11,9,1)    100%
+  );
+  pointer-events: none;
+}
+
+.hero-nav {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding: 2rem 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+}
+
+.hero-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: var(--cream);
+  text-decoration: none;
+}
+
+.hero-logo em { font-style: italic; color: var(--accent); }
+
+.hero-nav-links {
+  display: flex; gap: 2rem; align-items: center;
+}
+
+.hero-nav-links a {
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(232,226,216,0.65);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.hero-nav-links a:hover { color: var(--cream); }
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+  padding: 0 4rem 5rem;
+}
+
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(3.5rem, 9vw, 8rem);
+  font-weight: 300;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: var(--cream);
+}
+
+.hero-title em { font-style: italic; color: var(--accent); }
+
+.hero-sub {
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(232,226,216,0.55);
+  margin-top: 1.2rem;
+}
+
+.hero-scroll {
+  position: absolute;
+  bottom: 2.5rem; right: 4rem;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-scroll span {
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(232,226,216,0.4);
+  writing-mode: vertical-rl;
+}
+
+.scroll-line {
+  width: 1px; height: 48px;
+  background: linear-gradient(to bottom, rgba(200,169,110,0.6), transparent);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.4; transform: scaleY(1); }
+  50%       { opacity: 1;   transform: scaleY(1.15); }
+}
+
+/* ─────────────────────────────────────────
+   STATS BAR
+───────────────────────────────────────── */
+.stats-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.stat {
+  flex: 1;
+  padding: 1.8rem 2.5rem;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.stat:last-child { border-right: none; }
+
+.stat-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem;
+  font-weight: 300;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+/* ─────────────────────────────────────────
+   MAP SECTION
+───────────────────────────────────────── */
+.map-section {
+  border-bottom: 1px solid var(--border);
+}
+
+.map-header {
+  padding: 2.5rem 4rem 2rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.section-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.map-hint {
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: rgba(107,101,96,0.6);
+  text-transform: uppercase;
+}
+
+#map {
+  height: clamp(280px, 40vw, 480px);
+  width: 100%;
+}
+
+/* Leaflet dark theme */
+.leaflet-container { background: #0e0d0b; }
+.leaflet-control-attribution {
+  background: rgba(12,11,9,0.85) !important;
+  color: var(--muted) !important;
+  font-size: 0.5rem !important;
+  border-top: 1px solid var(--border) !important;
+}
+.leaflet-control-attribution a { color: var(--muted) !important; }
+.leaflet-control-zoom a {
+  background: var(--bg2) !important;
+  color: var(--muted) !important;
+  border-color: var(--border) !important;
+}
+.leaflet-control-zoom a:hover { color: var(--cream) !important; }
+
+.map-pin { background: none; border: none; }
+.pin-ring {
+  width: 14px; height: 14px;
+  position: relative;
+  cursor: pointer;
+}
+.pin-dot {
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  box-shadow: 0 0 8px rgba(200,169,110,0.5);
+  transition: transform 0.2s;
+}
+.pin-pulse {
+  width: 14px; height: 14px;
+  border: 1px solid rgba(200,169,110,0.4);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  animation: ping 2.5s ease-out infinite;
+}
+.pin-ring:hover .pin-dot { transform: translate(-50%,-50%) scale(1.6); }
+
+@keyframes ping {
+  0%   { transform: translate(-50%,-50%) scale(0.8); opacity: 0.8; }
+  100% { transform: translate(-50%,-50%) scale(2.2); opacity: 0; }
+}
+
+.leaflet-popup-content-wrapper {
+  background: var(--bg2) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 2px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
+  padding: 0 !important;
+}
+.leaflet-popup-content { margin: 0 !important; padding: 1rem 1.3rem !important; }
+.leaflet-popup-tip-container { display: none; }
+.leaflet-popup-close-button { color: var(--muted) !important; top: 6px !important; right: 8px !important; }
+.popup-title { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 300; color: var(--cream); }
+.popup-sub   { font-size: 0.58rem; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase; margin-top: 0.25rem; }
+.popup-date  { font-size: 0.58rem; letter-spacing: 0.1em; color: var(--muted); margin-top: 0.15rem; }
+.popup-goto  {
+  display: inline-block; margin-top: 0.7rem;
+  font-size: 0.58rem; letter-spacing: 0.14em;
+  color: var(--muted); text-transform: uppercase;
+  cursor: pointer; transition: color 0.2s;
+  background: none; border: none; padding: 0;
+  font-family: 'DM Mono', monospace;
+}
+.popup-goto:hover { color: var(--cream); }
+
+/* ─────────────────────────────────────────
+   TRIP SECTIONS
+───────────────────────────────────────── */
+.trip-section {
+  border-bottom: 1px solid var(--border);
+}
+
+/* Cover banner */
+.trip-banner {
+  position: relative;
+  height: clamp(320px, 55vh, 640px);
+  overflow: hidden;
+  background: var(--bg2);
+}
+
+.trip-banner img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: brightness(0.65);
+  transition: transform 8s ease;
+}
+
+.trip-section:hover .trip-banner img { transform: scale(1.03); }
+
+.trip-banner-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 30%,
+    rgba(12,11,9,0.7) 80%,
+    rgba(12,11,9,1) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 3rem 4rem;
+}
+
+.trip-index {
+  font-size: 0.58rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.6rem;
+}
+
+.trip-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.8rem, 7vw, 6rem);
+  font-weight: 300;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  color: var(--cream);
+}
+
+.trip-name em { font-style: italic; }
+
+.trip-route {
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(232,226,216,0.55);
+  margin-top: 0.7rem;
+}
+
+/* Body: text + gallery */
+.trip-body {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 0;
+  min-height: 0;
+}
+
+.trip-sidebar {
+  padding: 3rem 2.5rem 3rem 4rem;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.trip-meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.meta-label {
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.meta-value {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--cream);
+  line-height: 1.5;
+}
+
+.trip-text-content {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  line-height: 1.8;
+  color: rgba(232,226,216,0.7);
+}
+
+/* trip text placeholder style */
+.trip-text-content.placeholder {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.trip-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.trip-link {
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.2s;
+}
+
+.trip-link::before {
+  content: '↗';
+  color: var(--accent);
+  font-size: 0.7rem;
+}
+
+.trip-link:hover { color: var(--cream); }
+
+/* Gallery */
+.trip-gallery {
+  padding: 3rem;
+  columns: 2 220px;
+  column-gap: var(--gap);
+  align-content: start;
+}
+
+.gallery-item {
+  break-inside: avoid;
+  margin-bottom: var(--gap);
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.gallery-item img {
+  width: 100%;
+  display: block;
+  filter: brightness(0.88);
+  transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), filter 0.3s;
+}
+
+.gallery-item:hover img { transform: scale(1.03); filter: brightness(1); }
+
+.gallery-item-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(12,11,9,0.8) 0%, transparent 55%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  display: flex; flex-direction: column;
+  justify-content: flex-end;
+  padding: 0.85rem;
+}
+
+.gallery-item:hover .gallery-item-overlay { opacity: 1; }
+
+.gi-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem;
+  font-weight: 300;
+  color: var(--cream);
+}
+
+.gi-date {
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-top: 0.2rem;
+}
+
+/* ─────────────────────────────────────────
+   LIGHTBOX
+───────────────────────────────────────── */
+#lightbox {
+  position: fixed; inset: 0;
+  background: rgba(12,11,9,0.97);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+#lightbox.open { display: flex; }
+
+#lb-img {
+  max-width: 85vw;
+  max-height: 82vh;
+  object-fit: contain;
+  display: block;
+  border-radius: 2px;
+}
+
+.lb-caption {
+  position: fixed;
+  bottom: 2rem; left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.lb-caption-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem;
+  font-weight: 300;
+  color: var(--cream);
+}
+
+.lb-caption-meta {
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-top: 0.3rem;
+}
+
+.lb-close {
+  position: fixed;
+  top: 1.8rem; right: 2rem;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+
+.lb-close:hover { border-color: var(--cream); color: var(--cream); }
+
+.lb-nav {
+  position: fixed;
+  top: 50%; transform: translateY(-50%);
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 1.1rem;
+  width: 44px; height: 44px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 2px;
+}
+
+.lb-nav:hover { border-color: var(--cream); color: var(--cream); }
+#lb-prev { left: 1.5rem; }
+#lb-next { right: 1.5rem; }
+
+.lb-counter {
+  position: fixed;
+  top: 1.8rem; left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+/* ─────────────────────────────────────────
+   FOOTER
+───────────────────────────────────────── */
+footer {
+  padding: 2.5rem 4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+footer p {
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero-nav, .hero-content { padding-left: 2rem; padding-right: 2rem; }
+  .hero-scroll { right: 2rem; }
+  .trip-body { grid-template-columns: 1fr; }
+  .trip-sidebar {
+    padding: 2rem;
+    border-right: none;
     border-bottom: 1px solid var(--border);
-    animation: fadeUp 0.9s ease forwards;
   }
+  .trip-gallery { padding: 2rem; }
+  .trip-banner-overlay { padding: 2rem; }
+  .map-header { padding: 2rem; }
+  .stats-bar { flex-wrap: wrap; }
+  .stat { min-width: 50%; border-bottom: 1px solid var(--border); }
+}
+
+@media (max-width: 560px) {
+  .hero-title { font-size: clamp(2.8rem, 14vw, 5rem); }
+  .hero-nav-links { display: none; }
+  .trip-gallery { columns: 1; }
+  .stat { min-width: 100%; }
+  footer { padding: 2rem; }
+}
 
-  .site-name {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(2.6rem, 6vw, 5rem);
-    font-weight: 300;
-    letter-spacing: -0.02em;
-    line-height: 1;
-    color: var(--cream);
-  }
-
-  .site-name em {
-    font-style: italic;
-    color: var(--accent);
-  }
-
-  .site-tagline {
-    font-size: 0.68rem;
-    letter-spacing: 0.22em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-top: 0.6rem;
-  }
-
-  nav {
-    margin-top: 2rem;
-    display: flex;
-    gap: 2rem;
-    align-items: center;
-  }
-
-  nav a {
-    font-size: 0.68rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    text-decoration: none;
-    transition: color 0.2s;
-    cursor: pointer;
-  }
-
-  nav a:hover, nav a.active { color: var(--cream); }
-  nav .dot { width: 3px; height: 3px; background: var(--border); border-radius: 50%; }
-
-  /* ── STATS BAR ── */
-  .stats-bar {
-    padding: 1.2rem 4rem;
-    display: flex;
-    gap: 3rem;
-    border-bottom: 1px solid var(--border);
-    animation: fadeUp 0.9s ease 0.1s both;
-  }
-
-  .stat {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-  }
-
-  .stat-number {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.8rem;
-    font-weight: 300;
-    color: var(--accent);
-    line-height: 1;
-  }
-
-  .stat-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.18em;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-
-  /* ── MAP SECTION ── */
-  .map-section {
-    border-bottom: 1px solid var(--border);
-    animation: fadeUp 0.9s ease 0.2s both;
-  }
-
-  .map-section-header {
-    padding: 2rem 4rem 1.5rem;
-    display: flex;
-    align-items: baseline;
-    gap: 1.5rem;
-  }
-
-  .section-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.3rem;
-    font-weight: 300;
-    font-style: italic;
-    color: var(--muted);
-    letter-spacing: 0.05em;
-  }
-
-  #map {
-    height: 380px;
-    width: 100%;
-  }
-
-  /* Leaflet overrides */
-  .leaflet-container { background: var(--bg2); }
-  .leaflet-control-attribution { background: rgba(12,11,9,0.8) !important; color: var(--muted) !important; font-size: 0.55rem !important; }
-  .leaflet-control-attribution a { color: var(--muted) !important; }
-  .leaflet-control-zoom a {
-    background: var(--bg2) !important;
-    color: var(--muted) !important;
-    border-color: var(--border) !important;
-    font-size: 1rem !important;
-  }
-  .leaflet-control-zoom a:hover { color: var(--cream) !important; }
-
-  .map-pin { background: none; border: none; }
-  .pin-dot {
-    width: 10px; height: 10px;
-    background: var(--accent);
-    border-radius: 50%;
-    border: 2px solid rgba(200,169,110,0.3);
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 0 10px rgba(200,169,110,0.35);
-  }
-  .pin-dot:hover { transform: scale(1.6); box-shadow: 0 0 16px rgba(200,169,110,0.6); }
-
-  .leaflet-popup-content-wrapper {
-    background: var(--bg2) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 2px !important;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.5) !important;
-    padding: 0 !important;
-  }
-  .leaflet-popup-content {
-    margin: 0 !important;
-    padding: 0.8rem 1.1rem !important;
-  }
-  .leaflet-popup-tip { background: var(--bg2) !important; }
-  .leaflet-popup-close-button { color: var(--muted) !important; font-size: 1rem !important; padding: 4px 6px !important; }
-  .popup-title { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 300; color: var(--cream); }
-  .popup-sub  { font-size: 0.6rem; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase; margin-top: 0.2rem; }
-  .popup-link { display: inline-block; margin-top: 0.5rem; font-size: 0.6rem; letter-spacing: 0.12em; color: var(--muted); text-decoration: none; text-transform: uppercase; cursor: pointer; transition: color 0.2s; }
-  .popup-link:hover { color: var(--cream); }
-
-  /* ── TIMELINE ── */
-  .timeline-section {
-    padding: 3rem 4rem;
-    animation: fadeUp 0.9s ease 0.3s both;
-  }
-
-  .timeline-section-header {
-    display: flex;
-    align-items: baseline;
-    gap: 1.5rem;
-    margin-bottom: 3rem;
-  }
-
-  .year-group { margin-bottom: 4rem; }
-
-  .year-label {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 4rem;
-    font-weight: 300;
-    color: var(--border);
-    line-height: 1;
-    margin-bottom: 1.5rem;
-    letter-spacing: -0.02em;
-    user-select: none;
-  }
-
-  .trips-list { display: flex; flex-direction: column; gap: 1.5rem; }
-
-  /* ── TRIP CARD ── */
-  .trip-card {
-    display: grid;
-    grid-template-columns: 380px 1fr;
-    height: 240px;
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: border-color 0.3s;
-    background: var(--bg2);
-    scroll-margin-top: 2rem;
-  }
-
-  .trip-card:hover { border-color: rgba(200,169,110,0.4); }
-
-  .trip-cover {
-    position: relative;
-    overflow: hidden;
-    background: var(--bg3);
-  }
-
-  .trip-cover img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    filter: brightness(0.82);
-  }
-
-  .trip-card:hover .trip-cover img { transform: scale(1.05); filter: brightness(0.95); }
-
-  .cover-placeholder {
-    width: 100%; height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-    font-size: 0.6rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-  }
-
-  .trip-info {
-    padding: 2rem 2.5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  .trip-info-top { display: flex; flex-direction: column; gap: 0.5rem; }
-
-  .trip-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 2rem;
-    font-weight: 300;
-    color: var(--cream);
-    line-height: 1;
-    letter-spacing: -0.01em;
-  }
-
-  .trip-subtitle {
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    color: var(--accent);
-    text-transform: uppercase;
-  }
-
-  .trip-date {
-    font-size: 0.62rem;
-    letter-spacing: 0.12em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-top: 0.3rem;
-  }
-
-  .trip-preview {
-    display: flex;
-    gap: 0.4rem;
-    margin-top: 1rem;
-  }
-
-  .preview-thumb {
-    width: 48px; height: 36px;
-    object-fit: cover;
-    border-radius: 2px;
-    filter: brightness(0.7);
-    transition: filter 0.2s;
-  }
-
-  .trip-card:hover .preview-thumb { filter: brightness(0.9); }
-
-  .trip-info-bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .trip-count {
-    font-size: 0.6rem;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-
-  .trip-open-btn {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    background: none;
-    border: 1px solid var(--border);
-    padding: 0.4rem 1rem;
-    cursor: pointer;
-    border-radius: 2px;
-    transition: all 0.2s;
-  }
-
-  .trip-open-btn:hover, .trip-card:hover .trip-open-btn {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
-  /* ── TRIP ALBUM OVERLAY ── */
-  #trip-overlay {
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    z-index: 100;
-    display: none;
-    flex-direction: column;
-    overflow-y: auto;
-  }
-
-  #trip-overlay.open { display: flex; }
-
-  .overlay-header {
-    padding: 2.5rem 4rem 2rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    background: rgba(12,11,9,0.95);
-    backdrop-filter: blur(8px);
-    z-index: 10;
-  }
-
-  .overlay-header-info { display: flex; flex-direction: column; gap: 0.4rem; }
-
-  .overlay-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    font-weight: 300;
-    color: var(--cream);
-    line-height: 1;
-    letter-spacing: -0.02em;
-  }
-
-  .overlay-subtitle {
-    font-size: 0.65rem;
-    letter-spacing: 0.18em;
-    color: var(--accent);
-    text-transform: uppercase;
-  }
-
-  .overlay-meta {
-    font-size: 0.62rem;
-    letter-spacing: 0.12em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-top: 0.2rem;
-  }
-
-  .overlay-close {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.62rem;
-    letter-spacing: 0.15em;
-    padding: 0.5rem 1.2rem;
-    cursor: pointer;
-    text-transform: uppercase;
-    border-radius: 2px;
-    transition: all 0.2s;
-    white-space: nowrap;
-    margin-top: 0.5rem;
-  }
-
-  .overlay-close:hover { border-color: var(--cream); color: var(--cream); }
-
-  .overlay-gallery {
-    padding: 3rem 4rem;
-    columns: 3 260px;
-    column-gap: 1rem;
-  }
-
-  .overlay-item {
-    break-inside: avoid;
-    margin-bottom: 1rem;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    border-radius: 2px;
-  }
-
-  .overlay-item img {
-    width: 100%;
-    display: block;
-    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    filter: brightness(0.85);
-  }
-
-  .overlay-item:hover img { transform: scale(1.03); filter: brightness(1); }
-
-  .overlay-item-info {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(12,11,9,0.85) 0%, transparent 55%);
-    opacity: 0;
-    transition: opacity 0.3s;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 0.9rem;
-  }
-
-  .overlay-item:hover .overlay-item-info { opacity: 1; }
-
-  .overlay-item-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1rem;
-    font-weight: 300;
-    color: var(--cream);
-  }
-
-  .overlay-item-date {
-    font-size: 0.58rem;
-    letter-spacing: 0.12em;
-    color: var(--accent);
-    text-transform: uppercase;
-    margin-top: 0.2rem;
-  }
-
-  /* ── LIGHTBOX ── */
-  #lightbox {
-    position: fixed;
-    inset: 0;
-    background: rgba(12,11,9,0.97);
-    z-index: 200;
-    display: none;
-    align-items: center;
-    justify-content: center;
-  }
-
-  #lightbox.open { display: flex; }
-
-  .lb-inner {
-    position: relative;
-    max-width: 90vw;
-    max-height: 90vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  #lb-img {
-    max-width: 85vw;
-    max-height: 82vh;
-    object-fit: contain;
-    display: block;
-    border-radius: 2px;
-  }
-
-  .lb-caption {
-    position: fixed;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    white-space: nowrap;
-  }
-
-  .lb-caption-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.3rem;
-    font-weight: 300;
-    color: var(--cream);
-  }
-
-  .lb-caption-meta {
-    font-size: 0.62rem;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-top: 0.3rem;
-  }
-
-  .lb-close {
-    position: fixed;
-    top: 1.8rem;
-    right: 2rem;
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.62rem;
-    letter-spacing: 0.15em;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    text-transform: uppercase;
-    border-radius: 2px;
-    transition: all 0.2s;
-  }
-
-  .lb-close:hover { border-color: var(--cream); color: var(--cream); }
-
-  .lb-nav {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-size: 1.1rem;
-    width: 44px; height: 44px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 2px;
-  }
-
-  .lb-nav:hover { border-color: var(--cream); color: var(--cream); }
-  #lb-prev { left: 1.5rem; }
-  #lb-next { right: 1.5rem; }
-
-  .lb-counter {
-    position: fixed;
-    top: 1.8rem;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.62rem;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-
-  /* ── FOOTER ── */
-  footer {
-    padding: 2.5rem 4rem;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  footer p {
-    font-size: 0.62rem;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-  }
-
-  /* ── ANIMATIONS ── */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 900px) {
-    .trip-card { grid-template-columns: 1fr; height: auto; }
-    .trip-cover { height: 220px; }
-    .trip-info { padding: 1.5rem; }
-    .overlay-gallery { columns: 2 180px; }
-  }
-
-  @media (max-width: 640px) {
-    header, .stats-bar, .map-section-header,
-    .timeline-section, .overlay-gallery, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
-    .stats-bar { gap: 2rem; }
-    #map { height: 260px; }
-    .overlay-header { padding: 1.5rem; flex-direction: column; gap: 1rem; }
-    .overlay-gallery { columns: 1; }
-  }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header>
-  <h1 class="site-name">the<em>Journey</em></h1>
-  <p class="site-tagline">Reisen &amp; Erinnerungen</p>
-  <nav>
-    <a id="nav-timeline" class="active" onclick="showTimeline()">Alle Reisen</a>
-    <span class="dot"></span>
-    <a id="nav-map" onclick="showMap()">Weltkarte</a>
+<!-- ══ HERO ══════════════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="hero-bg" id="hero-bg"></div>
+
+  <nav class="hero-nav">
+    <a href="#" class="hero-logo">the<em>Journey</em></a>
+    <div class="hero-nav-links" id="hero-nav-links">
+      <!-- Trip-Links werden per JS eingefügt -->
+    </div>
   </nav>
-</header>
 
-<!-- STATS BAR -->
-<div class="stats-bar" id="stats-bar">
-  <div class="stat">
-    <span class="stat-number" id="stat-trips">—</span>
-    <span class="stat-label">Reisen</span>
+  <div class="hero-content">
+    <h1 class="hero-title">the<em>Journey</em></h1>
+    <p class="hero-sub" id="hero-sub">Reisen &amp; Erinnerungen</p>
   </div>
-  <div class="stat">
-    <span class="stat-number" id="stat-countries">—</span>
-    <span class="stat-label">Länder</span>
-  </div>
-  <div class="stat">
-    <span class="stat-number" id="stat-photos">—</span>
-    <span class="stat-label">Fotos</span>
-  </div>
-  <div class="stat">
-    <span class="stat-number" id="stat-years">—</span>
-    <span class="stat-label">Jahre</span>
-  </div>
-</div>
 
-<!-- MAP SECTION -->
-<section class="map-section" id="map-section">
-  <div class="map-section-header">
-    <span class="section-title">Wo ich war</span>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- ══ STATS ══════════════════════════════════ -->
+<div class="stats-bar" id="stats-bar"></div>
+
+<!-- ══ KARTE ══════════════════════════════════ -->
+<section class="map-section">
+  <div class="map-header">
+    <span class="section-label">Destinationen</span>
+    <span class="map-hint">Pin anklicken → zur Reise scrollen</span>
   </div>
   <div id="map"></div>
 </section>
 
-<!-- TIMELINE -->
-<section class="timeline-section" id="timeline-section">
-  <div class="timeline-section-header">
-    <span class="section-title">Chronologie</span>
-  </div>
-  <div id="timeline"></div>
-</section>
+<!-- ══ TRIPS (werden per JS gerendert) ════════ -->
+<div id="trips-container"></div>
 
-<!-- TRIP ALBUM OVERLAY -->
-<div id="trip-overlay">
-  <div class="overlay-header">
-    <div class="overlay-header-info">
-      <h2 class="overlay-title" id="ov-title"></h2>
-      <p class="overlay-subtitle" id="ov-subtitle"></p>
-      <p class="overlay-meta" id="ov-meta"></p>
-    </div>
-    <button class="overlay-close" id="ov-close">← Zurück</button>
-  </div>
-  <div class="overlay-gallery" id="ov-gallery"></div>
-</div>
-
-<!-- LIGHTBOX -->
+<!-- ══ LIGHTBOX ═══════════════════════════════ -->
 <div id="lightbox">
   <button class="lb-close" id="lb-close">schliessen</button>
   <span class="lb-counter" id="lb-counter"></span>
   <button class="lb-nav" id="lb-prev">&#8592;</button>
-  <div class="lb-inner">
-    <img id="lb-img" src="" alt="">
-  </div>
+  <img id="lb-img" src="" alt="">
   <button class="lb-nav" id="lb-next">&#8594;</button>
   <div class="lb-caption">
     <p class="lb-caption-title" id="lb-title"></p>
@@ -689,7 +698,7 @@
 </div>
 
 <footer>
-  <p>&copy; 2025 Ricco Innocente — Alle Rechte vorbehalten</p>
+  <p>&copy; 2025 Ricco Innocente</p>
   <p>theJourney</p>
 </footer>
 
@@ -697,22 +706,28 @@
 <script>
 
 /* ═══════════════════════════════════════════════════════════
-   REISE-KONFIGURATION
+   KONFIGURATION
    ───────────────────────────────────────────────────────────
-   Füge hier deine Reisen hinzu. Reihenfolge ist egal —
-   sie werden automatisch chronologisch sortiert.
+   HERO_PHOTO: Pfad zum Hintergrundbild im Hero.
+               Leer lassen ("") → automatisch das Cover
+               des neuesten Trips verwenden.
 
-   FELDER:
-   id:       eindeutiger Bezeichner (keine Leerzeichen, z.B. "japan-2024")
-   title:    Name der Destination (z.B. "Japan")
-   subtitle: Orte / Route (z.B. "Tokyo · Kyoto · Osaka")
-   country:  Ländername für Statistiken
-   date:     Datum als Text (z.B. "Oktober 2024")
-   year:     Jahr als Zahl (z.B. 2024)
-   coords:   [Breitengrad, Längengrad] für die Karte
-   cover:    Pfad zum Titelbild (z.B. "bilder/japan-2024/cover.jpg")
-   photos:   Array von Fotos mit src, title und date
+   TRIPS: Array aller Reisen. Felder:
+   ─ id:       Eindeutiger Bezeichner, keine Leerzeichen
+   ─ title:    Destinationsname
+   ─ subtitle: Route / Orte
+   ─ country:  Land (für Statistik)
+   ─ date:     Datum als Text
+   ─ year:     Jahr als Zahl
+   ─ coords:   [lat, lng] für die Karte
+   ─ cover:    Pfad zum Titelbild
+   ─ text:     Kurzer Text zur Reise (optional)
+   ─ links:    Array von { label, url } (optional)
+   ─ photos:   Array von { src, title, date }
 ═══════════════════════════════════════════════════════════ */
+
+const HERO_PHOTO = ""; // z.B. "bilder/appulien-2025/DSCF1206.jpg"
+
 const TRIPS = [
   {
     id: "appulien-2025",
@@ -723,6 +738,10 @@ const TRIPS = [
     year: 2025,
     coords: [40.6824, 17.0736],
     cover: "bilder/appulien-2025/DSCF0436.jpg",
+    text: "", // Kurzen Text hier eintragen, z.B. "Weisse Stadtmauern, türkisblaues Wasser, Trullis und Matera – Apulien ist roh, ehrlich und eines der schönsten Stücke Italiens."
+    links: [
+      // { label: "Google Maps – Polignano a Mare", url: "https://maps.google.com/..." },
+    ],
     photos: [
       { src: "bilder/appulien-2025/DSCF0436.jpg", title: "Polignano a Mare",  date: "2025" },
       { src: "bilder/appulien-2025/DSCF0441.jpg", title: "Lama Monachile",    date: "2025" },
@@ -730,32 +749,57 @@ const TRIPS = [
       { src: "bilder/appulien-2025/DSCF1206.jpg", title: "Torre costiera",    date: "2025" },
     ]
   }
+  // Weitere Reisen einfach hier anhängen:
+  // { id: "...", title: "...", ... }
 ];
 
-/* ═══ TRIPS SORTIEREN (neueste zuerst) ═══ */
+/* ─── Sortierung: neueste zuerst ─── */
 TRIPS.sort((a, b) => b.year - a.year);
 
-/* ═══ STATISTIKEN ═══ */
+/* ─── Hero-Foto ─── */
+const heroBg = document.getElementById('hero-bg');
+const heroPhoto = HERO_PHOTO || (TRIPS.length ? TRIPS[0].cover : '');
+if (heroPhoto) heroBg.style.backgroundImage = `url('${heroPhoto}')`;
+
+/* ─── Parallax ─── */
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  heroBg.style.transform = `translateY(${y * 0.3}px)`;
+}, { passive: true });
+
+/* ─── Stats ─── */
 function renderStats() {
   const countries = [...new Set(TRIPS.map(t => t.country))].length;
-  const photos    = TRIPS.reduce((sum, t) => sum + t.photos.length, 0);
+  const photos    = TRIPS.reduce((s, t) => s + t.photos.length, 0);
   const years     = [...new Set(TRIPS.map(t => t.year))].length;
-
-  document.getElementById('stat-trips').textContent     = TRIPS.length;
-  document.getElementById('stat-countries').textContent = countries;
-  document.getElementById('stat-photos').textContent    = photos;
-  document.getElementById('stat-years').textContent     = years;
+  const stats = [
+    { n: TRIPS.length, l: 'Reisen' },
+    { n: countries,    l: 'Länder' },
+    { n: photos,       l: 'Fotos'  },
+    { n: years,        l: 'Jahre'  },
+  ];
+  document.getElementById('stats-bar').innerHTML = stats.map(s => `
+    <div class="stat">
+      <span class="stat-number">${s.n}</span>
+      <span class="stat-label">${s.l}</span>
+    </div>`).join('');
 }
 
-/* ═══ KARTE ═══ */
-let mapInstance = null;
+/* ─── Navigation im Hero ─── */
+function renderHeroNav() {
+  const nav = document.getElementById('hero-nav-links');
+  nav.innerHTML = TRIPS.map(t =>
+    `<a href="#trip-${t.id}">${t.title}</a>`
+  ).join('');
+}
+
+/* ─── Karte ─── */
+let map;
 
 function initMap() {
-  if (mapInstance) return;
-
-  mapInstance = L.map('map', {
-    zoomControl: true,
+  map = L.map('map', {
     scrollWheelZoom: false,
+    zoomControl: true,
     attributionControl: true
   }).setView([30, 15], 2);
 
@@ -763,212 +807,162 @@ function initMap() {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
     subdomains: 'abcd',
     maxZoom: 19
-  }).addTo(mapInstance);
+  }).addTo(map);
 
   TRIPS.forEach(trip => {
     const icon = L.divIcon({
       className: 'map-pin',
-      html: '<div class="pin-dot"></div>',
-      iconSize: [10, 10],
-      iconAnchor: [5, 5],
-      popupAnchor: [0, -8]
+      html: `<div class="pin-ring"><div class="pin-pulse"></div><div class="pin-dot"></div></div>`,
+      iconSize: [14, 14],
+      iconAnchor: [7, 7],
+      popupAnchor: [0, -10]
     });
 
-    const marker = L.marker(trip.coords, { icon }).addTo(mapInstance);
+    const marker = L.marker(trip.coords, { icon }).addTo(map);
 
     marker.bindPopup(`
       <p class="popup-title">${trip.title}</p>
       <p class="popup-sub">${trip.subtitle}</p>
-      <p class="popup-sub" style="color:var(--muted);margin-top:0.2rem">${trip.date}</p>
-      <a class="popup-link" onclick="openTrip('${trip.id}')">Fotos ansehen →</a>
-    `, { maxWidth: 200 });
+      <p class="popup-date">${trip.date}</p>
+      <button class="popup-goto" onclick="scrollToTrip('${trip.id}')">Zur Reise scrollen →</button>
+    `, { maxWidth: 220, closeButton: true });
   });
 }
 
-/* ═══ TIMELINE RENDERN ═══ */
-function renderTimeline() {
-  const container = document.getElementById('timeline');
-  container.innerHTML = '';
-
-  // Nach Jahren gruppieren
-  const byYear = {};
-  TRIPS.forEach(trip => {
-    if (!byYear[trip.year]) byYear[trip.year] = [];
-    byYear[trip.year].push(trip);
-  });
-
-  // Absteigend
-  const sortedYears = Object.keys(byYear).sort((a, b) => b - a);
-
-  sortedYears.forEach(year => {
-    const group = document.createElement('div');
-    group.className = 'year-group';
-
-    group.innerHTML = `<div class="year-label">${year}</div>`;
-
-    const list = document.createElement('div');
-    list.className = 'trips-list';
-
-    byYear[year].forEach(trip => {
-      const card = document.createElement('div');
-      card.className = 'trip-card';
-      card.id = `trip-${trip.id}`;
-
-      // Cover-Bild
-      const previewThumbs = trip.photos.slice(0, 3).map(p =>
-        `<img class="preview-thumb" src="${p.src}" alt="${p.title}" onerror="this.style.display='none'">`
-      ).join('');
-
-      card.innerHTML = `
-        <div class="trip-cover">
-          <img src="${trip.cover}" alt="${trip.title}"
-               onerror="this.style.display='none';this.parentElement.querySelector('.cover-placeholder').style.display='flex'">
-          <div class="cover-placeholder" style="display:none">Kein Cover</div>
-        </div>
-        <div class="trip-info">
-          <div class="trip-info-top">
-            <h2 class="trip-title">${trip.title}</h2>
-            <p class="trip-subtitle">${trip.subtitle}</p>
-            <p class="trip-date">${trip.date}</p>
-            <div class="trip-preview">${previewThumbs}</div>
-          </div>
-          <div class="trip-info-bottom">
-            <span class="trip-count">${trip.photos.length} Foto${trip.photos.length !== 1 ? 's' : ''}</span>
-            <button class="trip-open-btn">Album öffnen →</button>
-          </div>
-        </div>
-      `;
-
-      card.addEventListener('click', () => openTrip(trip.id));
-      list.appendChild(card);
-    });
-
-    group.appendChild(list);
-    container.appendChild(group);
-  });
+function scrollToTrip(id) {
+  const el = document.getElementById(`trip-${id}`);
+  if (el) {
+    map.closePopup();
+    el.scrollIntoView({ behavior: 'smooth' });
+  }
 }
 
-/* ═══ TRIP ALBUM OVERLAY ═══ */
-let currentPhotos = [];
-let currentPhotoIndex = 0;
+/* ─── Trips rendern ─── */
+function renderTrips() {
+  const container = document.getElementById('trips-container');
 
-function openTrip(tripId) {
-  const trip = TRIPS.find(t => t.id === tripId);
-  if (!trip) return;
+  TRIPS.forEach((trip, idx) => {
+    const section = document.createElement('section');
+    section.className = 'trip-section';
+    section.id = `trip-${trip.id}`;
 
-  currentPhotos = trip.photos;
+    /* Sidebar-Content */
+    const textHtml = trip.text
+      ? `<p class="trip-text-content">${trip.text}</p>`
+      : `<p class="trip-text-content placeholder">Hier kannst du einen kurzen Text zur Reise eintragen — im TRIPS-Array, Feld "text".</p>`;
 
-  document.getElementById('ov-title').textContent    = trip.title;
-  document.getElementById('ov-subtitle').textContent = trip.subtitle;
-  document.getElementById('ov-meta').textContent     = trip.date + ' · ' + trip.photos.length + ' Fotos';
+    const linksHtml = trip.links && trip.links.length
+      ? `<div class="trip-links">${trip.links.map(l =>
+          `<a class="trip-link" href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`
+        ).join('')}</div>`
+      : '';
 
-  const gallery = document.getElementById('ov-gallery');
-  gallery.innerHTML = '';
+    /* Photos */
+    const photosHtml = trip.photos.map((p, i) => `
+      <div class="gallery-item" data-trip="${trip.id}" data-idx="${i}">
+        <img src="${p.src}" alt="${p.title}" loading="lazy"
+             onerror="this.closest('.gallery-item').style.display='none'">
+        <div class="gallery-item-overlay">
+          <p class="gi-title">${p.title}</p>
+          <p class="gi-date">${p.date}</p>
+        </div>
+      </div>`).join('');
 
-  trip.photos.forEach((photo, idx) => {
-    const item = document.createElement('div');
-    item.className = 'overlay-item';
-    item.innerHTML = `
-      <img src="${photo.src}" alt="${photo.title}" loading="lazy"
-           onerror="this.parentElement.style.display='none'">
-      <div class="overlay-item-info">
-        <p class="overlay-item-title">${photo.title}</p>
-        <p class="overlay-item-date">${photo.date}</p>
+    section.innerHTML = `
+      <div class="trip-banner">
+        <img src="${trip.cover}" alt="${trip.title}"
+             onerror="this.style.display='none'">
+        <div class="trip-banner-overlay">
+          <p class="trip-index">${String(idx + 1).padStart(2,'0')} — ${trip.date}</p>
+          <h2 class="trip-name">${trip.title}</h2>
+          <p class="trip-route">${trip.subtitle}</p>
+        </div>
+      </div>
+      <div class="trip-body">
+        <aside class="trip-sidebar">
+          <div class="trip-meta-row">
+            <span class="meta-label">Destination</span>
+            <span class="meta-value">${trip.title}</span>
+          </div>
+          <div class="trip-meta-row">
+            <span class="meta-label">Route</span>
+            <span class="meta-value">${trip.subtitle}</span>
+          </div>
+          <div class="trip-meta-row">
+            <span class="meta-label">Datum</span>
+            <span class="meta-value">${trip.date}</span>
+          </div>
+          <div class="trip-meta-row">
+            <span class="meta-label">Land</span>
+            <span class="meta-value">${trip.country}</span>
+          </div>
+          ${textHtml}
+          ${linksHtml}
+        </aside>
+        <div class="trip-gallery">${photosHtml}</div>
       </div>
     `;
-    item.addEventListener('click', () => openLightbox(idx));
-    gallery.appendChild(item);
+
+    container.appendChild(section);
   });
 
-  // Leaflet-Popup schliessen falls offen
-  if (mapInstance) mapInstance.closePopup();
-
-  const overlay = document.getElementById('trip-overlay');
-  overlay.classList.add('open');
-  overlay.scrollTop = 0;
-  document.body.style.overflow = 'hidden';
+  /* Click-Handler für Lightbox */
+  document.querySelectorAll('.gallery-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const tripId = item.dataset.trip;
+      const idx    = parseInt(item.dataset.idx);
+      const trip   = TRIPS.find(t => t.id === tripId);
+      if (trip) openLightbox(trip.photos, idx);
+    });
+  });
 }
 
-function closeTrip() {
-  document.getElementById('trip-overlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-document.getElementById('ov-close').addEventListener('click', closeTrip);
-
-/* ═══ LIGHTBOX ═══ */
+/* ─── Lightbox ─── */
+let lbPhotos = [], lbIdx = 0;
 const lightbox  = document.getElementById('lightbox');
 const lbImg     = document.getElementById('lb-img');
 const lbTitle   = document.getElementById('lb-title');
 const lbMeta    = document.getElementById('lb-meta');
 const lbCounter = document.getElementById('lb-counter');
 
-function openLightbox(idx) {
-  currentPhotoIndex = idx;
-  showLightboxPhoto();
+function openLightbox(photos, idx) {
+  lbPhotos = photos;
+  lbIdx    = idx;
+  showLbPhoto();
   lightbox.classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
-function showLightboxPhoto() {
-  const photo = currentPhotos[currentPhotoIndex];
-  lbImg.src   = photo.src;
-  lbImg.alt   = photo.title;
-  lbTitle.textContent   = photo.title;
-  lbMeta.textContent    = photo.date;
-  lbCounter.textContent = (currentPhotoIndex + 1) + ' / ' + currentPhotos.length;
+function showLbPhoto() {
+  const p = lbPhotos[lbIdx];
+  lbImg.src = p.src; lbImg.alt = p.title;
+  lbTitle.textContent   = p.title;
+  lbMeta.textContent    = p.date;
+  lbCounter.textContent = `${lbIdx + 1} / ${lbPhotos.length}`;
 }
 
 function closeLightbox() {
   lightbox.classList.remove('open');
+  document.body.style.overflow = '';
   lbImg.src = '';
 }
 
 document.getElementById('lb-close').addEventListener('click', closeLightbox);
 lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
-
-document.getElementById('lb-prev').addEventListener('click', () => {
-  currentPhotoIndex = (currentPhotoIndex - 1 + currentPhotos.length) % currentPhotos.length;
-  showLightboxPhoto();
-});
-
-document.getElementById('lb-next').addEventListener('click', () => {
-  currentPhotoIndex = (currentPhotoIndex + 1) % currentPhotos.length;
-  showLightboxPhoto();
-});
+document.getElementById('lb-prev').addEventListener('click', () => { lbIdx = (lbIdx - 1 + lbPhotos.length) % lbPhotos.length; showLbPhoto(); });
+document.getElementById('lb-next').addEventListener('click', () => { lbIdx = (lbIdx + 1) % lbPhotos.length; showLbPhoto(); });
 
 document.addEventListener('keydown', e => {
-  if (lightbox.classList.contains('open')) {
-    if (e.key === 'Escape')      closeLightbox();
-    if (e.key === 'ArrowLeft')  { currentPhotoIndex = (currentPhotoIndex - 1 + currentPhotos.length) % currentPhotos.length; showLightboxPhoto(); }
-    if (e.key === 'ArrowRight') { currentPhotoIndex = (currentPhotoIndex + 1) % currentPhotos.length; showLightboxPhoto(); }
-    return;
-  }
-  if (document.getElementById('trip-overlay').classList.contains('open')) {
-    if (e.key === 'Escape') closeTrip();
-  }
+  if (!lightbox.classList.contains('open')) return;
+  if (e.key === 'Escape')     closeLightbox();
+  if (e.key === 'ArrowLeft')  { lbIdx = (lbIdx - 1 + lbPhotos.length) % lbPhotos.length; showLbPhoto(); }
+  if (e.key === 'ArrowRight') { lbIdx = (lbIdx + 1) % lbPhotos.length; showLbPhoto(); }
 });
 
-/* ═══ NAV ═══ */
-function showTimeline() {
-  document.getElementById('nav-timeline').classList.add('active');
-  document.getElementById('nav-map').classList.remove('active');
-  document.getElementById('map-section').style.display = 'block';
-  document.getElementById('timeline-section').style.display = 'block';
-  document.querySelector('.stats-bar').style.display = 'flex';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function showMap() {
-  document.getElementById('nav-map').classList.add('active');
-  document.getElementById('nav-timeline').classList.remove('active');
-  document.getElementById('map-section').scrollIntoView({ behavior: 'smooth' });
-  // Karte neu zeichnen (manchmal nötig nach Display-Änderungen)
-  if (mapInstance) setTimeout(() => mapInstance.invalidateSize(), 100);
-}
-
-/* ═══ INIT ═══ */
+/* ─── Init ─── */
 renderStats();
-renderTimeline();
+renderHeroNav();
+renderTrips();
 initMap();
 
 </script>
