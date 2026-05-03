@@ -3,19 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portfolio</title>
+<title>theJourney</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0c0b09;
-    --bg2: #141310;
-    --cream: #e8e2d8;
-    --muted: #6b6560;
-    --accent: #c8a96e;
-    --border: rgba(200,169,110,0.15);
+    --bg:      #0c0b09;
+    --bg2:     #141310;
+    --bg3:     #1a1916;
+    --cream:   #e8e2d8;
+    --muted:   #6b6560;
+    --accent:  #c8a96e;
+    --border:  rgba(200,169,110,0.15);
   }
 
   html { scroll-behavior: smooth; }
@@ -26,7 +28,6 @@
     font-family: 'DM Mono', monospace;
     font-weight: 300;
     min-height: 100vh;
-    cursor: default;
   }
 
   /* grain overlay */
@@ -35,7 +36,6 @@
     position: fixed;
     inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    background-repeat: repeat;
     background-size: 200px 200px;
     pointer-events: none;
     z-index: 999;
@@ -44,17 +44,14 @@
 
   /* ── HEADER ── */
   header {
-    padding: 4rem 4rem 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    padding: 4rem 4rem 2.5rem;
     border-bottom: 1px solid var(--border);
-    animation: fadeUp 1s ease forwards;
+    animation: fadeUp 0.9s ease forwards;
   }
 
   .site-name {
     font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(2.4rem, 6vw, 4.5rem);
+    font-size: clamp(2.6rem, 6vw, 5rem);
     font-weight: 300;
     letter-spacing: -0.02em;
     line-height: 1;
@@ -67,188 +64,416 @@
   }
 
   .site-tagline {
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
     color: var(--muted);
     text-transform: uppercase;
+    margin-top: 0.6rem;
   }
 
   nav {
-    margin-top: 1.5rem;
+    margin-top: 2rem;
     display: flex;
     gap: 2rem;
     align-items: center;
   }
 
   nav a {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--muted);
     text-decoration: none;
     transition: color 0.2s;
+    cursor: pointer;
   }
 
   nav a:hover, nav a.active { color: var(--cream); }
+  nav .dot { width: 3px; height: 3px; background: var(--border); border-radius: 50%; }
 
-  nav .dot {
-    width: 3px; height: 3px;
-    background: var(--border);
-    border-radius: 50%;
-  }
-
-  /* ── FILTER BAR ── */
-  .filter-bar {
-    padding: 1.5rem 4rem;
+  /* ── STATS BAR ── */
+  .stats-bar {
+    padding: 1.2rem 4rem;
     display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
+    gap: 3rem;
     border-bottom: 1px solid var(--border);
-    animation: fadeUp 1s ease 0.2s both;
+    animation: fadeUp 0.9s ease 0.1s both;
   }
 
-  .filter-btn {
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .stat-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* ── MAP SECTION ── */
+  .map-section {
+    border-bottom: 1px solid var(--border);
+    animation: fadeUp 0.9s ease 0.2s both;
+  }
+
+  .map-section-header {
+    padding: 2rem 4rem 1.5rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1.5rem;
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  #map {
+    height: 380px;
+    width: 100%;
+  }
+
+  /* Leaflet overrides */
+  .leaflet-container { background: var(--bg2); }
+  .leaflet-control-attribution { background: rgba(12,11,9,0.8) !important; color: var(--muted) !important; font-size: 0.55rem !important; }
+  .leaflet-control-attribution a { color: var(--muted) !important; }
+  .leaflet-control-zoom a {
+    background: var(--bg2) !important;
+    color: var(--muted) !important;
+    border-color: var(--border) !important;
+    font-size: 1rem !important;
+  }
+  .leaflet-control-zoom a:hover { color: var(--cream) !important; }
+
+  .map-pin { background: none; border: none; }
+  .pin-dot {
+    width: 10px; height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    border: 2px solid rgba(200,169,110,0.3);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 10px rgba(200,169,110,0.35);
+  }
+  .pin-dot:hover { transform: scale(1.6); box-shadow: 0 0 16px rgba(200,169,110,0.6); }
+
+  .leaflet-popup-content-wrapper {
+    background: var(--bg2) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 2px !important;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5) !important;
+    padding: 0 !important;
+  }
+  .leaflet-popup-content {
+    margin: 0 !important;
+    padding: 0.8rem 1.1rem !important;
+  }
+  .leaflet-popup-tip { background: var(--bg2) !important; }
+  .leaflet-popup-close-button { color: var(--muted) !important; font-size: 1rem !important; padding: 4px 6px !important; }
+  .popup-title { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 300; color: var(--cream); }
+  .popup-sub  { font-size: 0.6rem; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase; margin-top: 0.2rem; }
+  .popup-link { display: inline-block; margin-top: 0.5rem; font-size: 0.6rem; letter-spacing: 0.12em; color: var(--muted); text-decoration: none; text-transform: uppercase; cursor: pointer; transition: color 0.2s; }
+  .popup-link:hover { color: var(--cream); }
+
+  /* ── TIMELINE ── */
+  .timeline-section {
+    padding: 3rem 4rem;
+    animation: fadeUp 0.9s ease 0.3s both;
+  }
+
+  .timeline-section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .year-group { margin-bottom: 4rem; }
+
+  .year-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 4rem;
+    font-weight: 300;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+    user-select: none;
+  }
+
+  .trips-list { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  /* ── TRIP CARD ── */
+  .trip-card {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    height: 240px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    background: var(--bg2);
+    scroll-margin-top: 2rem;
+  }
+
+  .trip-card:hover { border-color: rgba(200,169,110,0.4); }
+
+  .trip-cover {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg3);
+  }
+
+  .trip-cover img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    filter: brightness(0.82);
+  }
+
+  .trip-card:hover .trip-cover img { transform: scale(1.05); filter: brightness(0.95); }
+
+  .cover-placeholder {
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .trip-info {
+    padding: 2rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .trip-info-top { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .trip-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 300;
+    color: var(--cream);
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .trip-subtitle {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .trip-date {
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+  }
+
+  .trip-preview {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 1rem;
+  }
+
+  .preview-thumb {
+    width: 48px; height: 36px;
+    object-fit: cover;
+    border-radius: 2px;
+    filter: brightness(0.7);
+    transition: filter 0.2s;
+  }
+
+  .trip-card:hover .preview-thumb { filter: brightness(0.9); }
+
+  .trip-info-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .trip-count {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .trip-open-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 0.4rem 1rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+
+  .trip-open-btn:hover, .trip-card:hover .trip-open-btn {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── TRIP ALBUM OVERLAY ── */
+  #trip-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 100;
+    display: none;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  #trip-overlay.open { display: flex; }
+
+  .overlay-header {
+    padding: 2.5rem 4rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(12,11,9,0.95);
+    backdrop-filter: blur(8px);
+    z-index: 10;
+  }
+
+  .overlay-header-info { display: flex; flex-direction: column; gap: 0.4rem; }
+
+  .overlay-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 300;
+    color: var(--cream);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .overlay-subtitle {
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .overlay-meta {
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 0.2rem;
+  }
+
+  .overlay-close {
     background: none;
     border: 1px solid var(--border);
     color: var(--muted);
     font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     letter-spacing: 0.15em;
-    text-transform: uppercase;
-    padding: 0.4rem 1rem;
+    padding: 0.5rem 1.2rem;
     cursor: pointer;
-    transition: all 0.2s;
+    text-transform: uppercase;
     border-radius: 2px;
+    transition: all 0.2s;
+    white-space: nowrap;
+    margin-top: 0.5rem;
   }
 
-  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .overlay-close:hover { border-color: var(--cream); color: var(--cream); }
 
-  /* ── MASONRY GRID ── */
-  .gallery {
+  .overlay-gallery {
     padding: 3rem 4rem;
-    columns: 3 280px;
+    columns: 3 260px;
     column-gap: 1rem;
-    animation: fadeUp 1s ease 0.3s both;
   }
 
-  .gallery-item {
+  .overlay-item {
     break-inside: avoid;
     margin-bottom: 1rem;
     position: relative;
     overflow: hidden;
     cursor: pointer;
     border-radius: 2px;
-    display: block;
   }
 
-  .gallery-item img,
-  .gallery-item .video-thumb {
+  .overlay-item img {
     width: 100%;
     display: block;
     transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    filter: brightness(0.88);
+    filter: brightness(0.85);
   }
 
-  .gallery-item:hover img,
-  .gallery-item:hover .video-thumb { transform: scale(1.03); filter: brightness(1); }
+  .overlay-item:hover img { transform: scale(1.03); filter: brightness(1); }
 
-  .item-overlay {
+  .overlay-item-info {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(12,11,9,0.85) 0%, transparent 50%);
+    background: linear-gradient(to top, rgba(12,11,9,0.85) 0%, transparent 55%);
     opacity: 0;
     transition: opacity 0.3s;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding: 1rem;
+    padding: 0.9rem;
   }
 
-  .gallery-item:hover .item-overlay { opacity: 1; }
+  .overlay-item:hover .overlay-item-info { opacity: 1; }
 
-  .item-title {
+  .overlay-item-title {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 300;
     color: var(--cream);
-    line-height: 1.2;
   }
 
-  .item-meta {
-    font-size: 0.6rem;
-    letter-spacing: 0.15em;
+  .overlay-item-date {
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
     color: var(--accent);
     text-transform: uppercase;
-    margin-top: 0.3rem;
+    margin-top: 0.2rem;
   }
-
-  .video-badge {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    background: rgba(12,11,9,0.8);
-    border: 1px solid var(--border);
-    color: var(--accent);
-    font-size: 0.6rem;
-    letter-spacing: 0.1em;
-    padding: 0.3rem 0.6rem;
-    text-transform: uppercase;
-    border-radius: 2px;
-  }
-
-  .video-thumb {
-    background: var(--bg2);
-    aspect-ratio: 16/9;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .video-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: absolute;
-    inset: 0;
-  }
-
-  .play-icon {
-    position: relative;
-    z-index: 1;
-    width: 44px;
-    height: 44px;
-    border: 1.5px solid rgba(232,226,216,0.6);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .play-icon::after {
-    content: '';
-    display: block;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 8px 0 8px 14px;
-    border-color: transparent transparent transparent var(--cream);
-    margin-left: 3px;
-  }
-
-  .hidden { display: none !important; }
 
   /* ── LIGHTBOX ── */
   #lightbox {
     position: fixed;
     inset: 0;
     background: rgba(12,11,9,0.97);
-    z-index: 1000;
+    z-index: 200;
     display: none;
     align-items: center;
     justify-content: center;
-    animation: fadeIn 0.2s ease;
   }
 
   #lightbox.open { display: flex; }
@@ -270,19 +495,13 @@
     border-radius: 2px;
   }
 
-  #lb-iframe {
-    width: min(85vw, 960px);
-    aspect-ratio: 16/9;
-    border: none;
-    border-radius: 2px;
-  }
-
   .lb-caption {
     position: fixed;
     bottom: 2rem;
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
+    white-space: nowrap;
   }
 
   .lb-caption-title {
@@ -293,7 +512,7 @@
   }
 
   .lb-caption-meta {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     letter-spacing: 0.15em;
     color: var(--muted);
     text-transform: uppercase;
@@ -302,19 +521,19 @@
 
   .lb-close {
     position: fixed;
-    top: 2rem;
+    top: 1.8rem;
     right: 2rem;
     background: none;
     border: 1px solid var(--border);
     color: var(--muted);
     font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     letter-spacing: 0.15em;
     padding: 0.5rem 1rem;
     cursor: pointer;
     text-transform: uppercase;
-    transition: all 0.2s;
     border-radius: 2px;
+    transition: all 0.2s;
   }
 
   .lb-close:hover { border-color: var(--cream); color: var(--cream); }
@@ -326,9 +545,8 @@
     background: none;
     border: 1px solid var(--border);
     color: var(--muted);
-    font-size: 1.2rem;
-    width: 44px;
-    height: 44px;
+    font-size: 1.1rem;
+    width: 44px; height: 44px;
     cursor: pointer;
     transition: all 0.2s;
     display: flex;
@@ -343,10 +561,10 @@
 
   .lb-counter {
     position: fixed;
-    top: 2rem;
+    top: 1.8rem;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     letter-spacing: 0.15em;
     color: var(--muted);
     text-transform: uppercase;
@@ -354,7 +572,7 @@
 
   /* ── FOOTER ── */
   footer {
-    padding: 3rem 4rem;
+    padding: 2.5rem 4rem;
     border-top: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
@@ -364,62 +582,104 @@
   }
 
   footer p {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     letter-spacing: 0.1em;
     color: var(--muted);
   }
 
   /* ── ANIMATIONS ── */
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   /* ── RESPONSIVE ── */
-  @media (max-width: 768px) {
-    header, .filter-bar, .gallery, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
-    .gallery { columns: 2 160px; }
-    nav { gap: 1rem; }
+  @media (max-width: 900px) {
+    .trip-card { grid-template-columns: 1fr; height: auto; }
+    .trip-cover { height: 220px; }
+    .trip-info { padding: 1.5rem; }
+    .overlay-gallery { columns: 2 180px; }
   }
 
-  @media (max-width: 480px) {
-    .gallery { columns: 1; }
+  @media (max-width: 640px) {
+    header, .stats-bar, .map-section-header,
+    .timeline-section, .overlay-gallery, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .stats-bar { gap: 2rem; }
+    #map { height: 260px; }
+    .overlay-header { padding: 1.5rem; flex-direction: column; gap: 1rem; }
+    .overlay-gallery { columns: 1; }
   }
 </style>
 </head>
 <body>
 
+<!-- HEADER -->
 <header>
-  <h1 class="site-name">Dein <em>Name</em></h1>
-  <p class="site-tagline">Fotografie &amp; Visuals</p>
+  <h1 class="site-name">the<em>Journey</em></h1>
+  <p class="site-tagline">Reisen &amp; Erinnerungen</p>
   <nav>
-    <a href="#" class="active" data-filter="all">Alle</a>
+    <a id="nav-timeline" class="active" onclick="showTimeline()">Alle Reisen</a>
     <span class="dot"></span>
-    <a href="#" data-filter="reisen">Reisen</a>
-    <span class="dot"></span>
-    <a href="#" data-filter="portrait">Portrait</a>
-    <span class="dot"></span>
-    <a href="#" data-filter="natur">Natur</a>
-    <span class="dot"></span>
-    <a href="#" data-filter="video">Video</a>
+    <a id="nav-map" onclick="showMap()">Weltkarte</a>
   </nav>
 </header>
 
-<div class="gallery" id="gallery"></div>
+<!-- STATS BAR -->
+<div class="stats-bar" id="stats-bar">
+  <div class="stat">
+    <span class="stat-number" id="stat-trips">—</span>
+    <span class="stat-label">Reisen</span>
+  </div>
+  <div class="stat">
+    <span class="stat-number" id="stat-countries">—</span>
+    <span class="stat-label">Länder</span>
+  </div>
+  <div class="stat">
+    <span class="stat-number" id="stat-photos">—</span>
+    <span class="stat-label">Fotos</span>
+  </div>
+  <div class="stat">
+    <span class="stat-number" id="stat-years">—</span>
+    <span class="stat-label">Jahre</span>
+  </div>
+</div>
 
-<!-- Lightbox -->
+<!-- MAP SECTION -->
+<section class="map-section" id="map-section">
+  <div class="map-section-header">
+    <span class="section-title">Wo ich war</span>
+  </div>
+  <div id="map"></div>
+</section>
+
+<!-- TIMELINE -->
+<section class="timeline-section" id="timeline-section">
+  <div class="timeline-section-header">
+    <span class="section-title">Chronologie</span>
+  </div>
+  <div id="timeline"></div>
+</section>
+
+<!-- TRIP ALBUM OVERLAY -->
+<div id="trip-overlay">
+  <div class="overlay-header">
+    <div class="overlay-header-info">
+      <h2 class="overlay-title" id="ov-title"></h2>
+      <p class="overlay-subtitle" id="ov-subtitle"></p>
+      <p class="overlay-meta" id="ov-meta"></p>
+    </div>
+    <button class="overlay-close" id="ov-close">← Zurück</button>
+  </div>
+  <div class="overlay-gallery" id="ov-gallery"></div>
+</div>
+
+<!-- LIGHTBOX -->
 <div id="lightbox">
   <button class="lb-close" id="lb-close">schliessen</button>
   <span class="lb-counter" id="lb-counter"></span>
   <button class="lb-nav" id="lb-prev">&#8592;</button>
-  <div class="lb-inner" id="lb-inner">
-    <img id="lb-img" src="" alt="" style="display:none">
-    <iframe id="lb-iframe" src="" allowfullscreen style="display:none"></iframe>
+  <div class="lb-inner">
+    <img id="lb-img" src="" alt="">
   </div>
   <button class="lb-nav" id="lb-next">&#8594;</button>
   <div class="lb-caption">
@@ -429,210 +689,335 @@
 </div>
 
 <footer>
-  <p>&copy; 2025 Dein Name — Alle Rechte vorbehalten</p>
-  <p>Zürich, Schweiz</p>
+  <p>&copy; 2025 Ricco Innocente — Alle Rechte vorbehalten</p>
+  <p>theJourney</p>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-/* ═══════════════════════════════════════════════════
-   PORTFOLIO KONFIGURATION
-   Hier kannst du deine Fotos und Videos eintragen.
 
-   type:     "image" oder "youtube"
-   src:      Pfad zur Bilddatei (z.B. "bilder/foto1.jpg")
-             oder YouTube-Video-ID (z.B. "dQw4w9WgXcQ")
-   thumb:    Vorschaubild für YouTube (optional, sonst auto)
-   title:    Bildtitel
-   category: Kategorie für den Filter (muss mit nav übereinstimmen)
-   date:     Datum oder Ort – beliebiger Text
-═══════════════════════════════════════════════════ */
-const PORTFOLIO = [
+/* ═══════════════════════════════════════════════════════════
+   REISE-KONFIGURATION
+   ───────────────────────────────────────────────────────────
+   Füge hier deine Reisen hinzu. Reihenfolge ist egal —
+   sie werden automatisch chronologisch sortiert.
+
+   FELDER:
+   id:       eindeutiger Bezeichner (keine Leerzeichen, z.B. "japan-2024")
+   title:    Name der Destination (z.B. "Japan")
+   subtitle: Orte / Route (z.B. "Tokyo · Kyoto · Osaka")
+   country:  Ländername für Statistiken
+   date:     Datum als Text (z.B. "Oktober 2024")
+   year:     Jahr als Zahl (z.B. 2024)
+   coords:   [Breitengrad, Längengrad] für die Karte
+   cover:    Pfad zum Titelbild (z.B. "bilder/japan-2024/cover.jpg")
+   photos:   Array von Fotos mit src, title und date
+═══════════════════════════════════════════════════════════ */
+const TRIPS = [
   {
-    type: "image",
-    src: "bilder/foto1.jpg",
-    title: "Goldene Stunde",
-    category: "natur",
-    date: "Appenzell, 2024"
+    id: "japan-2024",
+    title: "Japan",
+    subtitle: "Tokyo · Kyoto · Osaka",
+    country: "Japan",
+    date: "Oktober 2024",
+    year: 2024,
+    coords: [36.2048, 138.2529],
+    cover: "bilder/japan-2024/cover.jpg",
+    photos: [
+      { src: "bilder/japan-2024/01.jpg", title: "Shibuya Crossing",    date: "Okt 2024" },
+      { src: "bilder/japan-2024/02.jpg", title: "Fushimi Inari",       date: "Okt 2024" },
+      { src: "bilder/japan-2024/03.jpg", title: "Nishiki Markt",       date: "Okt 2024" },
+      { src: "bilder/japan-2024/04.jpg", title: "Arashiyama",          date: "Okt 2024" },
+      { src: "bilder/japan-2024/05.jpg", title: "Dotonbori",           date: "Okt 2024" },
+    ]
   },
   {
-    type: "image",
-    src: "bilder/foto2.jpg",
-    title: "Altstadt",
-    category: "reisen",
-    date: "Lissabon, 2024"
+    id: "island-2023",
+    title: "Island",
+    subtitle: "Reykjavík · Ringstraße",
+    country: "Island",
+    date: "August 2023",
+    year: 2023,
+    coords: [64.9631, -19.0208],
+    cover: "bilder/island-2023/cover.jpg",
+    photos: [
+      { src: "bilder/island-2023/01.jpg", title: "Skógafoss",          date: "Aug 2023" },
+      { src: "bilder/island-2023/02.jpg", title: "Jökulsárlón",        date: "Aug 2023" },
+      { src: "bilder/island-2023/03.jpg", title: "Geysir",             date: "Aug 2023" },
+      { src: "bilder/island-2023/04.jpg", title: "Kirkjufell",         date: "Aug 2023" },
+    ]
   },
   {
-    type: "youtube",
-    src: "dQw4w9WgXcQ",
-    title: "Reel — Sommer 2024",
-    category: "video",
-    date: "2024"
+    id: "marokko-2023",
+    title: "Marokko",
+    subtitle: "Marrakesch · Chefchaouen · Sahara",
+    country: "Marokko",
+    date: "März 2023",
+    year: 2023,
+    coords: [31.7917, -7.0926],
+    cover: "bilder/marokko-2023/cover.jpg",
+    photos: [
+      { src: "bilder/marokko-2023/01.jpg", title: "Djemaa el-Fna",    date: "Mär 2023" },
+      { src: "bilder/marokko-2023/02.jpg", title: "Blaue Stadt",       date: "Mär 2023" },
+      { src: "bilder/marokko-2023/03.jpg", title: "Sahara",            date: "Mär 2023" },
+    ]
   },
   {
-    type: "image",
-    src: "bilder/foto3.jpg",
-    title: "Stille",
-    category: "portrait",
-    date: "Studio, 2023"
-  },
-  {
-    type: "image",
-    src: "bilder/foto4.jpg",
-    title: "Bergpanorama",
-    category: "natur",
-    date: "Engadin, 2024"
-  },
-  {
-    type: "image",
-    src: "bilder/foto5.jpg",
-    title: "Markt",
-    category: "reisen",
-    date: "Marrakesch, 2023"
-  },
-  {
-    type: "youtube",
-    src: "dQw4w9WgXcQ",
-    title: "Reisefilm — Südeuropa",
-    category: "video",
-    date: "2023"
-  },
-  {
-    type: "image",
-    src: "bilder/foto6.jpg",
-    title: "Licht & Schatten",
-    category: "portrait",
-    date: "Winterthur, 2024"
-  },
-  {
-    type: "image",
-    src: "bilder/foto7.jpg",
-    title: "Nebel",
-    category: "natur",
-    date: "Pilatus, 2024"
+    id: "portugal-2022",
+    title: "Portugal",
+    subtitle: "Lissabon · Porto · Sintra",
+    country: "Portugal",
+    date: "September 2022",
+    year: 2022,
+    coords: [39.3999, -8.2245],
+    cover: "bilder/portugal-2022/cover.jpg",
+    photos: [
+      { src: "bilder/portugal-2022/01.jpg", title: "Alfama",           date: "Sep 2022" },
+      { src: "bilder/portugal-2022/02.jpg", title: "Ribeira",          date: "Sep 2022" },
+      { src: "bilder/portugal-2022/03.jpg", title: "Castelo dos Mouros", date: "Sep 2022" },
+    ]
   }
 ];
 
-/* ═══ GALLERY RENDER ═══ */
-const gallery = document.getElementById('gallery');
-let currentItems = [];
-let currentIndex = 0;
-let activeFilter = 'all';
+/* ═══ TRIPS SORTIEREN (neueste zuerst) ═══ */
+TRIPS.sort((a, b) => b.year - a.year);
 
-function getYtThumb(id) {
-  return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+/* ═══ STATISTIKEN ═══ */
+function renderStats() {
+  const countries = [...new Set(TRIPS.map(t => t.country))].length;
+  const photos    = TRIPS.reduce((sum, t) => sum + t.photos.length, 0);
+  const years     = [...new Set(TRIPS.map(t => t.year))].length;
+
+  document.getElementById('stat-trips').textContent     = TRIPS.length;
+  document.getElementById('stat-countries').textContent = countries;
+  document.getElementById('stat-photos').textContent    = photos;
+  document.getElementById('stat-years').textContent     = years;
 }
 
-function renderGallery(filter) {
-  activeFilter = filter;
-  gallery.innerHTML = '';
-  currentItems = [];
+/* ═══ KARTE ═══ */
+let mapInstance = null;
 
-  PORTFOLIO.forEach((item, i) => {
-    if (filter !== 'all' && item.category !== filter) return;
+function initMap() {
+  if (mapInstance) return;
 
-    currentItems.push({ ...item, originalIndex: i });
-    const el = document.createElement('div');
-    el.className = 'gallery-item';
-    el.dataset.index = currentItems.length - 1;
+  mapInstance = L.map('map', {
+    zoomControl: true,
+    scrollWheelZoom: false,
+    attributionControl: true
+  }).setView([30, 15], 2);
 
-    if (item.type === 'image') {
-      el.innerHTML = `
-        <img src="${item.src}" alt="${item.title}" loading="lazy">
-        <div class="item-overlay">
-          <p class="item-title">${item.title}</p>
-          <p class="item-meta">${item.date}</p>
-        </div>`;
-    } else {
-      const thumb = item.thumb || getYtThumb(item.src);
-      el.innerHTML = `
-        <div class="video-thumb">
-          <img src="${thumb}" alt="${item.title}" loading="lazy">
-          <div class="play-icon"></div>
-        </div>
-        <span class="video-badge">Video</span>
-        <div class="item-overlay">
-          <p class="item-title">${item.title}</p>
-          <p class="item-meta">${item.date}</p>
-        </div>`;
-    }
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19
+  }).addTo(mapInstance);
 
-    el.addEventListener('click', () => openLightbox(parseInt(el.dataset.index)));
-    gallery.appendChild(el);
+  TRIPS.forEach(trip => {
+    const icon = L.divIcon({
+      className: 'map-pin',
+      html: '<div class="pin-dot"></div>',
+      iconSize: [10, 10],
+      iconAnchor: [5, 5],
+      popupAnchor: [0, -8]
+    });
+
+    const marker = L.marker(trip.coords, { icon }).addTo(mapInstance);
+
+    marker.bindPopup(`
+      <p class="popup-title">${trip.title}</p>
+      <p class="popup-sub">${trip.subtitle}</p>
+      <p class="popup-sub" style="color:var(--muted);margin-top:0.2rem">${trip.date}</p>
+      <a class="popup-link" onclick="openTrip('${trip.id}')">Fotos ansehen →</a>
+    `, { maxWidth: 200 });
   });
 }
 
-/* ═══ LIGHTBOX ═══ */
-const lightbox = document.getElementById('lightbox');
-const lbImg    = document.getElementById('lb-img');
-const lbIframe = document.getElementById('lb-iframe');
-const lbTitle  = document.getElementById('lb-title');
-const lbMeta   = document.getElementById('lb-meta');
-const lbCounter = document.getElementById('lb-counter');
+/* ═══ TIMELINE RENDERN ═══ */
+function renderTimeline() {
+  const container = document.getElementById('timeline');
+  container.innerHTML = '';
 
-function openLightbox(idx) {
-  currentIndex = idx;
-  showItem();
-  lightbox.classList.add('open');
+  // Nach Jahren gruppieren
+  const byYear = {};
+  TRIPS.forEach(trip => {
+    if (!byYear[trip.year]) byYear[trip.year] = [];
+    byYear[trip.year].push(trip);
+  });
+
+  // Absteigend
+  const sortedYears = Object.keys(byYear).sort((a, b) => b - a);
+
+  sortedYears.forEach(year => {
+    const group = document.createElement('div');
+    group.className = 'year-group';
+
+    group.innerHTML = `<div class="year-label">${year}</div>`;
+
+    const list = document.createElement('div');
+    list.className = 'trips-list';
+
+    byYear[year].forEach(trip => {
+      const card = document.createElement('div');
+      card.className = 'trip-card';
+      card.id = `trip-${trip.id}`;
+
+      // Cover-Bild
+      const previewThumbs = trip.photos.slice(0, 3).map(p =>
+        `<img class="preview-thumb" src="${p.src}" alt="${p.title}" onerror="this.style.display='none'">`
+      ).join('');
+
+      card.innerHTML = `
+        <div class="trip-cover">
+          <img src="${trip.cover}" alt="${trip.title}"
+               onerror="this.style.display='none';this.parentElement.querySelector('.cover-placeholder').style.display='flex'">
+          <div class="cover-placeholder" style="display:none">Kein Cover</div>
+        </div>
+        <div class="trip-info">
+          <div class="trip-info-top">
+            <h2 class="trip-title">${trip.title}</h2>
+            <p class="trip-subtitle">${trip.subtitle}</p>
+            <p class="trip-date">${trip.date}</p>
+            <div class="trip-preview">${previewThumbs}</div>
+          </div>
+          <div class="trip-info-bottom">
+            <span class="trip-count">${trip.photos.length} Foto${trip.photos.length !== 1 ? 's' : ''}</span>
+            <button class="trip-open-btn">Album öffnen →</button>
+          </div>
+        </div>
+      `;
+
+      card.addEventListener('click', () => openTrip(trip.id));
+      list.appendChild(card);
+    });
+
+    group.appendChild(list);
+    container.appendChild(group);
+  });
+}
+
+/* ═══ TRIP ALBUM OVERLAY ═══ */
+let currentPhotos = [];
+let currentPhotoIndex = 0;
+
+function openTrip(tripId) {
+  const trip = TRIPS.find(t => t.id === tripId);
+  if (!trip) return;
+
+  currentPhotos = trip.photos;
+
+  document.getElementById('ov-title').textContent    = trip.title;
+  document.getElementById('ov-subtitle').textContent = trip.subtitle;
+  document.getElementById('ov-meta').textContent     = trip.date + ' · ' + trip.photos.length + ' Fotos';
+
+  const gallery = document.getElementById('ov-gallery');
+  gallery.innerHTML = '';
+
+  trip.photos.forEach((photo, idx) => {
+    const item = document.createElement('div');
+    item.className = 'overlay-item';
+    item.innerHTML = `
+      <img src="${photo.src}" alt="${photo.title}" loading="lazy"
+           onerror="this.parentElement.style.display='none'">
+      <div class="overlay-item-info">
+        <p class="overlay-item-title">${photo.title}</p>
+        <p class="overlay-item-date">${photo.date}</p>
+      </div>
+    `;
+    item.addEventListener('click', () => openLightbox(idx));
+    gallery.appendChild(item);
+  });
+
+  // Leaflet-Popup schliessen falls offen
+  if (mapInstance) mapInstance.closePopup();
+
+  const overlay = document.getElementById('trip-overlay');
+  overlay.classList.add('open');
+  overlay.scrollTop = 0;
   document.body.style.overflow = 'hidden';
 }
 
-function showItem() {
-  const item = currentItems[currentIndex];
-  lbTitle.textContent = item.title;
-  lbMeta.textContent  = item.category.toUpperCase() + ' — ' + item.date;
-  lbCounter.textContent = (currentIndex + 1) + ' / ' + currentItems.length;
+function closeTrip() {
+  document.getElementById('trip-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
 
-  if (item.type === 'image') {
-    lbImg.src = item.src;
-    lbImg.alt = item.title;
-    lbImg.style.display = 'block';
-    lbIframe.style.display = 'none';
-    lbIframe.src = '';
-  } else {
-    lbImg.style.display = 'none';
-    lbIframe.style.display = 'block';
-    lbIframe.src = `https://www.youtube.com/embed/${item.src}?autoplay=1`;
-  }
+document.getElementById('ov-close').addEventListener('click', closeTrip);
+
+/* ═══ LIGHTBOX ═══ */
+const lightbox  = document.getElementById('lightbox');
+const lbImg     = document.getElementById('lb-img');
+const lbTitle   = document.getElementById('lb-title');
+const lbMeta    = document.getElementById('lb-meta');
+const lbCounter = document.getElementById('lb-counter');
+
+function openLightbox(idx) {
+  currentPhotoIndex = idx;
+  showLightboxPhoto();
+  lightbox.classList.add('open');
+}
+
+function showLightboxPhoto() {
+  const photo = currentPhotos[currentPhotoIndex];
+  lbImg.src   = photo.src;
+  lbImg.alt   = photo.title;
+  lbTitle.textContent   = photo.title;
+  lbMeta.textContent    = photo.date;
+  lbCounter.textContent = (currentPhotoIndex + 1) + ' / ' + currentPhotos.length;
 }
 
 function closeLightbox() {
   lightbox.classList.remove('open');
-  lbIframe.src = '';
-  document.body.style.overflow = '';
+  lbImg.src = '';
 }
 
 document.getElementById('lb-close').addEventListener('click', closeLightbox);
 lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
 
 document.getElementById('lb-prev').addEventListener('click', () => {
-  currentIndex = (currentIndex - 1 + currentItems.length) % currentItems.length;
-  showItem();
+  currentPhotoIndex = (currentPhotoIndex - 1 + currentPhotos.length) % currentPhotos.length;
+  showLightboxPhoto();
 });
 
 document.getElementById('lb-next').addEventListener('click', () => {
-  currentIndex = (currentIndex + 1) % currentItems.length;
-  showItem();
+  currentPhotoIndex = (currentPhotoIndex + 1) % currentPhotos.length;
+  showLightboxPhoto();
 });
 
 document.addEventListener('keydown', e => {
-  if (!lightbox.classList.contains('open')) return;
-  if (e.key === 'Escape') closeLightbox();
-  if (e.key === 'ArrowLeft')  { currentIndex = (currentIndex - 1 + currentItems.length) % currentItems.length; showItem(); }
-  if (e.key === 'ArrowRight') { currentIndex = (currentIndex + 1) % currentItems.length; showItem(); }
+  if (lightbox.classList.contains('open')) {
+    if (e.key === 'Escape')      closeLightbox();
+    if (e.key === 'ArrowLeft')  { currentPhotoIndex = (currentPhotoIndex - 1 + currentPhotos.length) % currentPhotos.length; showLightboxPhoto(); }
+    if (e.key === 'ArrowRight') { currentPhotoIndex = (currentPhotoIndex + 1) % currentPhotos.length; showLightboxPhoto(); }
+    return;
+  }
+  if (document.getElementById('trip-overlay').classList.contains('open')) {
+    if (e.key === 'Escape') closeTrip();
+  }
 });
 
-/* ═══ NAV FILTER ═══ */
-document.querySelectorAll('nav a[data-filter]').forEach(a => {
-  a.addEventListener('click', e => {
-    e.preventDefault();
-    document.querySelectorAll('nav a').forEach(x => x.classList.remove('active'));
-    a.classList.add('active');
-    renderGallery(a.dataset.filter);
-  });
-});
+/* ═══ NAV ═══ */
+function showTimeline() {
+  document.getElementById('nav-timeline').classList.add('active');
+  document.getElementById('nav-map').classList.remove('active');
+  document.getElementById('map-section').style.display = 'block';
+  document.getElementById('timeline-section').style.display = 'block';
+  document.querySelector('.stats-bar').style.display = 'flex';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showMap() {
+  document.getElementById('nav-map').classList.add('active');
+  document.getElementById('nav-timeline').classList.remove('active');
+  document.getElementById('map-section').scrollIntoView({ behavior: 'smooth' });
+  // Karte neu zeichnen (manchmal nötig nach Display-Änderungen)
+  if (mapInstance) setTimeout(() => mapInstance.invalidateSize(), 100);
+}
 
 /* ═══ INIT ═══ */
-renderGallery('all');
+renderStats();
+renderTimeline();
+initMap();
+
 </script>
 </body>
 </html>
